@@ -54,15 +54,24 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const user = await prisma.user.findUnique({
+    where: { clerkId: userId },
+  });
+
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
   const projects = await prisma.project.findMany({
     where: {
       users: {
         some: {
-          userId,
+          userId: user.id,
         },
       },
     },
   });
+  console.log(projects);
 
   return NextResponse.json({ projects }, { status: 200 });
 }

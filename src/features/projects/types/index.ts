@@ -6,3 +6,7 @@ export type { CreateProjectInput };
 export type CreateProjectResponse = {
   project: Project;
 };
+
+export type GetAllProjectsResponse = {
+  projects: Project[];
+};

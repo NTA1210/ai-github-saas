@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type {
   CreateProjectInput,
   CreateProjectResponse,
@@ -12,7 +12,12 @@ async function createProject(
 }
 
 export function useCreateProject() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: createProject,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+    },
   });
 }
