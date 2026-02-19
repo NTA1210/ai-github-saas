@@ -1,11 +1,27 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
+// ✅ Public Pages — ai cũng truy cập được (không cần đăng nhập)
+const isPublicPage = createRouteMatcher([
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/", // landing page (nếu có)
+  // Thêm page public khác ở đây...
+]);
+
+// ✅ Public API Routes — ai cũng gọi được (không cần đăng nhập)
+const isPublicApi = createRouteMatcher([
+  // Ví dụ:
+  // "/api/posts(.*)",      // GET danh sách bài viết public
+  // "/api/contact(.*)",    // Form liên hệ
+  // Thêm API public khác ở đây...
+]);
 
 export default clerkMiddleware(async (auth, req) => {
-  if (!isPublicRoute(req)) {
-    await auth.protect();
-  }
+  // Nếu là public page hoặc public API → bỏ qua, không cần đăng nhập
+  if (isPublicPage(req) || isPublicApi(req)) return;
+
+  // Tất cả các route còn lại → bắt buộc đăng nhập
+  await auth.protect();
 });
 
 export const config = {
