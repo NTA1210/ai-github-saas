@@ -1,17 +1,50 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { useProjectStore } from "@/store/use-project-store";
+import { ExternalLink, Github } from "lucide-react";
+import Link from "next/link";
 
 export default function DashboardPage() {
-  const { isSignedIn, user, isLoaded } = useUser();
+  const { selectedProject } = useProjectStore();
 
-  // Handle loading state
-  if (!isLoaded) return <div>Loading...</div>;
+  if (!selectedProject) return null;
 
-  // Protect the page from unauthenticated users
-  if (!isSignedIn) return <div>Sign in to view this page</div>;
+  return (
+    <div>
+      <div className="flex items-center justify-between flex-wrap gap-y-4">
+        {/* github link */}
+        <div className="w-fit rounded-md bg-primary px-4 py-3">
+          <div className="flex items-center">
+            <Github className="size-5 text-white" />
+            <div className="ml-2">
+              <p className="text-sm font-medium text-white">
+                This project is linked to{" "}
+                <Link
+                  href={selectedProject?.githubUrl}
+                  target="_blank"
+                  className="inline-flex items-center text-white/80 hover:underline"
+                >
+                  {selectedProject?.githubUrl}
+                  <ExternalLink className="ml-1 size-4" />
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
 
-  console.log(user);
+        <div className="h-4"></div>
 
-  return <div>Hello {user.firstName}!</div>;
+        <div className="flex items-center gap-4">
+          Team member InviteButton AchiveButton
+        </div>
+      </div>
+      {selectedProject.id}
+      <div className="mt-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
+          AskQuestionCard Metting Card
+        </div>
+      </div>
+      <div className="mt-8">CommitLog</div>
+    </div>
+  );
 }

@@ -2,7 +2,6 @@
 
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { Field, FieldError, FieldGroup } from "@/components/ui/field";
@@ -14,10 +13,11 @@ import {
   type CreateProjectInput,
 } from "@/features/projects/schemas/create-project.schema";
 import { useCreateProject } from "@/features/projects/api/use-create-project";
+import useRefetch from "@/hooks/useRefetch";
 
 const CreateProjectPage = () => {
-  const router = useRouter();
   const { mutate: createProject, isPending } = useCreateProject();
+  const refetch = useRefetch({ targetQueryKey: ["projects"] });
 
   const { control, handleSubmit, reset } = useForm<CreateProjectInput>({
     resolver: zodResolver(createProjectSchema),
@@ -30,9 +30,10 @@ const CreateProjectPage = () => {
 
   const onSubmit = (data: CreateProjectInput) => {
     createProject(data, {
-      onSuccess: ({ project }) => {
+      onSuccess: async ({ project }) => {
         toast.success(`Project "${project.name}" created!`);
         reset();
+        await refetch();
       },
       onError: (err) => {
         toast.error(err.message);

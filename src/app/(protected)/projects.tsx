@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import {
   SidebarMenuButton,
   SidebarMenuItem,
@@ -9,6 +7,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useGetAllProjects } from "@/features/projects/api/use-get-all-projects";
+import { useProjectStore } from "@/store/use-project-store";
 import { cn } from "@/lib/utils";
 
 const ProjectSkeleton = () =>
@@ -21,8 +20,9 @@ const ProjectSkeleton = () =>
 const Projects = () => {
   const { data, isLoading } = useGetAllProjects();
   const projects = data?.projects ?? [];
-  const pathname = usePathname();
   const { open } = useSidebar();
+
+  const { selectedProject, setSelectedProject } = useProjectStore();
 
   if (isLoading) return <ProjectSkeleton />;
 
@@ -37,23 +37,23 @@ const Projects = () => {
   return (
     <>
       {projects.map((project) => {
-        const projectHref = `/projects/${project.id}`;
-        const isActive = pathname === projectHref;
+        const isActive = selectedProject?.id === project.id;
 
         return (
           <SidebarMenuItem key={project.id}>
-            <SidebarMenuButton asChild>
-              <Link href={projectHref}>
-                <div
-                  className={cn(
-                    "rounded-sm border size-6 flex shrink-0 items-center justify-center text-sm bg-white text-primary",
-                    { "bg-primary text-white": isActive },
-                  )}
-                >
-                  {project.name.charAt(0).toUpperCase()}
-                </div>
-                {open && <span className="truncate">{project.name}</span>}
-              </Link>
+            <SidebarMenuButton
+              onClick={() => setSelectedProject(project)}
+              className="cursor-pointer"
+            >
+              <div
+                className={cn(
+                  "rounded-sm border size-6 flex shrink-0 items-center justify-center text-sm bg-white text-primary",
+                  { "bg-primary text-white": isActive },
+                )}
+              >
+                {project.name.charAt(0).toUpperCase()}
+              </div>
+              {open && <span className="truncate">{project.name}</span>}
             </SidebarMenuButton>
           </SidebarMenuItem>
         );
