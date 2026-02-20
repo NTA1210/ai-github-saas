@@ -4,7 +4,8 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 const isPublicPage = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
-  "/", // landing page (nếu có)
+  "/sync-user", // ← QUAN TRỌNG: Clerk redirect đến đây sau sign-up
+  "/", // landing page
   // Thêm page public khác ở đây...
 ]);
 

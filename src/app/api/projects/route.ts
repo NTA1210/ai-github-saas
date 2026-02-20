@@ -71,7 +71,6 @@ export async function GET(req: NextRequest) {
       },
     },
   });
-  console.log(projects);
 
   return NextResponse.json({ projects }, { status: 200 });
 }
