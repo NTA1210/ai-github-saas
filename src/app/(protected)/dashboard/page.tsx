@@ -3,6 +3,7 @@
 import { useProjectStore } from "@/store/use-project-store";
 import { ExternalLink, Github } from "lucide-react";
 import Link from "next/link";
+import CommitLog from "./commit-log";
 
 export default function DashboardPage() {
   const { selectedProject } = useProjectStore();
@@ -38,13 +39,14 @@ export default function DashboardPage() {
           Team member InviteButton AchiveButton
         </div>
       </div>
-      {selectedProject.id}
       <div className="mt-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
           AskQuestionCard Metting Card
         </div>
       </div>
-      <div className="mt-8">CommitLog</div>
+      <div className="mt-8">
+        <CommitLog />
+      </div>
     </div>
   );
 }

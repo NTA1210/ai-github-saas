@@ -1,7 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getCommits } from "@/lib/github";
 import openAiService from "@/lib/openai";
 import http from "@/utils/http";
 
