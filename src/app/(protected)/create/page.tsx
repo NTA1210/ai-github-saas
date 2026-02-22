@@ -14,10 +14,17 @@ import {
 } from "@/features/projects/schemas/create-project.schema";
 import { useCreateProject } from "@/features/projects/api/use-create-project";
 import useRefetch from "@/hooks/useRefetch";
+import http from "@/utils/http";
+import { useProjectStore } from "@/store/use-project-store";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 const CreateProjectPage = () => {
   const { mutate: createProject, isPending } = useCreateProject();
   const refetch = useRefetch({ targetQueryKey: ["projects"] });
+  const router = useRouter();
+  const { setSelectedProject } = useProjectStore();
+  const queryClient = useQueryClient();
 
   const { control, handleSubmit, reset } = useForm<CreateProjectInput>({
     resolver: zodResolver(createProjectSchema),
@@ -34,6 +41,24 @@ const CreateProjectPage = () => {
         toast.success(`Project "${project.name}" created!`);
         reset();
         await refetch();
+        setSelectedProject(project);
+        router.push(`/dashboard`);
+
+        // Trigger summarize — client giữ kết nối an toàn trên serverless
+        toast.promise(
+          http.post(`/projects/${project.id}/summarize`).then((res) => {
+            // Summarize xong → invalidate query → commit-log.tsx tự refetch → hiện summary
+            queryClient.invalidateQueries({
+              queryKey: ["commits", project.id],
+            });
+            return res;
+          }),
+          {
+            loading: "Summarizing commits with AI...",
+            success: "Commits summarized!",
+            error: (err: Error) => `Summarize failed: ${err.message}`,
+          },
+        );
       },
       onError: (err) => {
         toast.error(err.message);

@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createProjectSchema } from "@/features/projects/schemas/create-project.schema";
 import { getCommits } from "@/lib/github";
-import http from "@/utils/http";
 
 export async function POST(req: NextRequest) {
   // 1. Auth check
@@ -76,18 +75,8 @@ export async function POST(req: NextRequest) {
     return newProject;
   });
 
-  // Fire & forget — PHẢI dùng absolute URL trên server
-  // Node.js không resolve được relative URL → "Invalid URL" bị .catch() nuốt im lặng
-  void http
-    .post(
-      `${req.nextUrl.origin}/api/projects/${project.id}/summarize`,
-      undefined,
-      {
-        headers: { cookie: req.headers.get("cookie") ?? "" },
-      },
-    )
-    .catch(() => {});
-
+  // Client sẽ trig summarize — server chỉ trả về project ID
+  // (fire & forget phía server bị serverless freeze, client trigger an toàn hơn)
   return NextResponse.json({ project }, { status: 201 });
 }
 

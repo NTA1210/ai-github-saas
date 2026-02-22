@@ -4,6 +4,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { QueryProvider } from "@/providers/query-provider";
 import { Toaster } from "sonner";
 import "./globals.css";
+import { envValidated } from "@/configs/env";
+
+// Validate environment variables
+envValidated();
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

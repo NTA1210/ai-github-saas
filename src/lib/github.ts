@@ -3,11 +3,12 @@ import dotenv from "dotenv";
 import { prisma } from "./prisma";
 import http from "@/utils/http";
 import openAiService from "./openai";
+import { env } from "@/configs/env";
 
 dotenv.config();
 
 const octokit = new Octokit({
-  auth: process.env.GITHUB_PAT,
+  auth: env.GITHUB_PAT,
 });
 
 type CommitData = {
@@ -26,9 +27,9 @@ export const getCommits = async (githubUrl: string): Promise<CommitData[]> => {
     throw new Error(`Invalid GitHub URL: ${githubUrl}`);
   }
 
-  const data = await octokit.rest.repos.listCommits({ owner, repo });
+  const { data } = await octokit.rest.repos.listCommits({ owner, repo });
 
-  return data.data.map((commit) => ({
+  return data.map((commit) => ({
     commitHash: commit.sha,
     commitMessage: commit.commit.message || "",
     commitAuthorName: commit.commit.author?.name || "",
@@ -90,3 +91,15 @@ async function summarizeCommit(githubUrl: string, commitHash: string) {
   );
   return openAiService.summarizeCommit(diff);
 }
+
+async function loadGithubRepo() {
+  const { data } = await octokit.repos.getContent({
+    owner: "nta1210",
+    repo: "ai-github-saas",
+    path: "src/app",
+  });
+
+  // console.log(data?.map((data) => data.name));
+}
+
+loadGithubRepo();

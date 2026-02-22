@@ -2,7 +2,6 @@ import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import openAiService from "@/lib/openai";
-import http from "@/utils/http";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -35,11 +34,20 @@ export async function POST(req: NextRequest, { params }: Params) {
   const results = await Promise.allSettled(
     unsummarizedCommits.map(async (commit) => {
       try {
-        // Lấy diff từ GitHub
-        const diff = await http.get<string>(
+        // Lấy diff từ GitHub — dùng native fetch, KHÔNG dùng http.ts
+        // http.ts có baseURL "/api" → http.get("https://github.com/...") sẽ fail
+        const diffRes = await fetch(
           `${project.githubUrl}/commit/${commit.commitHash}.diff`,
           { headers: { Accept: "application/vnd.github.v3.diff" } },
         );
+
+        if (!diffRes.ok) {
+          throw new Error(
+            `GitHub diff fetch failed: ${diffRes.status} ${diffRes.statusText}`,
+          );
+        }
+
+        const diff = await diffRes.text();
 
         // Gọi AI
         const summary = await openAiService.summarizeCommit(diff);
@@ -50,9 +58,20 @@ export async function POST(req: NextRequest, { params }: Params) {
           data: { summary },
         });
 
-        return { commitHash: commit.commitHash, status: "success" };
-      } catch {
-        return { commitHash: commit.commitHash, status: "failed" };
+        // update
+
+        return { commitHash: commit.commitHash, status: "success" as const };
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(
+          `[summarize] FAILED commit ${commit.commitHash.slice(0, 7)}:`,
+          message,
+        );
+        return {
+          commitHash: commit.commitHash,
+          status: "failed" as const,
+          error: message,
+        };
       }
     }),
   );
@@ -61,8 +80,26 @@ export async function POST(req: NextRequest, { params }: Params) {
     (r) => r.status === "fulfilled" && r.value.status === "success",
   ).length;
 
+  const failures = results
+    .filter((r) => r.status === "fulfilled" && r.value.status === "failed")
+    .map(
+      (r) =>
+        (
+          r as PromiseFulfilledResult<{
+            commitHash: string;
+            status: "failed";
+            error: string;
+          }>
+        ).value,
+    );
+
+  if (failures.length > 0) {
+    console.error(`[summarize] ${failures.length} commits failed:`, failures);
+  }
+
   return NextResponse.json({
     message: `Summarized ${succeeded}/${unsummarizedCommits.length} commits`,
     count: succeeded,
+    failures: failures.length > 0 ? failures : undefined,
   });
 }

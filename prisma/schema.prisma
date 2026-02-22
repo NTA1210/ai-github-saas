@@ -44,6 +44,7 @@ model Project {
 
   users   UserToProject[]
   commits Commit[]
+  sourceCodeEmbeddings SourceCodeEmbedding[]
 }
 
 model UserToProject {
@@ -77,4 +78,21 @@ model Commit {
   commitDate         String
   // ai summary
   summary            String?
+}
+
+
+model SourceCodeEmbedding {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  fileName   String
+  sourceCode String
+
+  summary String
+
+  @@index([projectId])
 }

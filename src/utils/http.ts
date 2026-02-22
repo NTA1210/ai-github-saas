@@ -12,7 +12,7 @@ import axios, {
 
 export const httpClient: AxiosInstance = axios.create({
   baseURL: "/api",
-  timeout: 10000,
+  // timeout: 20000,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
