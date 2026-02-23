@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 export default function ErrorBoundary({
   error,
   reset,
@@ -7,6 +9,7 @@ export default function ErrorBoundary({
   error: Error;
   reset: () => void;
 }) {
+  if (error) toast.error(error.message);
   return (
     <div>
       <h1>Something went wrong!</h1>

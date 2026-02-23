@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createProjectSchema } from "@/features/projects/schemas/create-project.schema";
 import { getCommits } from "@/lib/github";
+import { indexGithubRepo } from "@/lib/pipecone";
 
 export async function POST(req: NextRequest) {
   // 1. Auth check
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { repoUrl, projectName } = parsed.data;
+  const { repoUrl, projectName, githubToken } = parsed.data;
 
   // 3. Lookup user
   const user = await prisma.user.findUnique({ where: { clerkId: userId } });
@@ -74,6 +75,13 @@ export async function POST(req: NextRequest) {
 
     return newProject;
   });
+
+  // indexGithubRepo phải gọi SAU khi transaction commit
+  // Bên trong transaction: project chưa committed → FK constraint fail
+  // Đây là long-running task (AI + Pinecone), không block response
+  void indexGithubRepo(project.id, repoUrl, githubToken).catch((err) =>
+    console.error("[indexGithubRepo] failed:", err),
+  );
 
   // Client sẽ trig summarize — server chỉ trả về project ID
   // (fire & forget phía server bị serverless freeze, client trigger an toàn hơn)

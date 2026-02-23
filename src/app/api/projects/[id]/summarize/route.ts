@@ -58,7 +58,11 @@ export async function POST(req: NextRequest, { params }: Params) {
           data: { summary },
         });
 
-        // update
+        // update isFirstTimeSetup to false after summarizing
+        await prisma.project.update({
+          where: { id: projectId },
+          data: { isFirstTimeSetup: false },
+        });
 
         return { commitHash: commit.commitHash, status: "success" as const };
       } catch (err) {

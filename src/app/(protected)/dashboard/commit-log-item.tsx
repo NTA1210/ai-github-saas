@@ -46,6 +46,12 @@ const CommitLogItem = ({ commit, isLast }: CommitLogItemProps) => {
                 <ExternalLink className="ml-1 size-4" />
               </span>
             </Link>
+            <time
+              dateTime={commit.commitDate}
+              className="text-xs text-muted-foreground"
+            >
+              {new Date(commit.commitDate).toLocaleString()}
+            </time>
           </div>
           <span className="font-semibold">{commit.commitMessage}</span>
           <pre className="mt-2 whitespace-pre-wrap text-xs leading-6 text-gray-500">

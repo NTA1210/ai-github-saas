@@ -1,15 +1,28 @@
-import { env } from "@/configs/env";
+import { Document } from "@langchain/core/documents";
 import { GithubRepoLoader } from "@langchain/community/document_loaders/web/github";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-export async function loadGithubRepo(githubUrl: string, githubToken?: string) {
+export async function loadGithubRepo(
+  githubUrl: string,
+  githubToken?: string,
+): Promise<Document[]> {
   try {
     const loader = new GithubRepoLoader(githubUrl, {
-      accessToken: githubToken || env.GITHUB_PAT,
+      accessToken: githubToken,
       branch: "main",
-      ignoreFiles: ["package-lock.json", "yarn.lock", "pnpm-lock.yaml"],
+      ignoreFiles: [
+        "package-lock.json",
+        "yarn.lock",
+        "pnpm-lock.yaml",
+        ".env",
+        ".env.local",
+        ".env.example",
+        ".env.test",
+        ".env.dev",
+        ".env.prod",
+      ],
       recursive: true,
       unknown: "warn",
       maxConcurrency: 5,
@@ -21,7 +34,8 @@ export async function loadGithubRepo(githubUrl: string, githubToken?: string) {
     return docs;
   } catch (error: any) {
     console.log(error.message);
+    return [];
   }
 }
 
-loadGithubRepo("https://github.com/NTA1210/private-repo");
+// loadGithubRepo("https://github.com/NTA1210/f8-nodejs_day-4");

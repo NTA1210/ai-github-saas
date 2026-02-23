@@ -1,6 +1,6 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "./app-sidebar";
-import UserButtonWithLoading from "../../components/dashboard/user-button-with-loading";
+import UserButtonWithLoading from "@/components/user-button-with-loading";
 
 type Props = {
   children: React.ReactNode;

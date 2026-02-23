@@ -1,16 +1,21 @@
 import OpenAI from "openai";
 import dotenv from "dotenv";
 import { env } from "@/configs/env";
+import { Document } from "@langchain/core/documents";
 
 dotenv.config();
 
-const ai = new OpenAI({
-  apiKey: env.OPENAI_API_KEY,
-});
-
 class OpenAiService {
+  private readonly ai: OpenAI;
+
+  constructor() {
+    this.ai = new OpenAI({
+      apiKey: env.OPENAI_API_KEY,
+    });
+  }
+
   summarizeCommit = async (diff: string): Promise<string> => {
-    const response = await ai.chat.completions.create({
+    const response = await this.ai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
@@ -54,6 +59,45 @@ ${diff}`,
 
     return response.choices[0].message.content ?? "";
   };
+
+  summarizeCode = async (doc: Document): Promise<string> => {
+    const code = doc.pageContent.slice(0, 10000);
+    const response = await this.ai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: `You are a senior software engineer onboarding a junior developer to a new codebase.
+
+Explain the purpose of the file: ${doc.metadata.source}
+
+Here is the file content:
+---
+${code}
+---
+
+Provide:
+1. The main responsibility of this file
+2. How it fits into the overall system (if inferable)
+3. Key functions/classes and what they do (high-level only)
+
+Keep the explanation concise (max 120 words).
+Do not describe code line-by-line.`,
+        },
+      ],
+    });
+
+    return response.choices[0].message.content ?? "";
+  };
+
+  generateEmbedding = async (summary: string) => {
+    const response = await this.ai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: summary,
+    });
+
+    return response.data[0].embedding;
+  };
 }
 
 export default new OpenAiService();
@@ -72,5 +116,11 @@ export default new OpenAiService();
 // +const response = require("./src/middlewares/responseFormat");
 // +const errorHandler = require("./src/middlewares/exceptionHandler");
 // `);
+//   console.log(result);
+// })();
+
+// (async () => {
+//   const openaiService = new OpenAiService();
+//   const result = await openaiService.generateEmbedding("Hello world");
 //   console.log(result);
 // })();
