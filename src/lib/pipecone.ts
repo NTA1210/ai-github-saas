@@ -4,6 +4,9 @@ import { Pinecone } from "@pinecone-database/pinecone";
 import { loadGithubRepo } from "./github-loader";
 import openaiService from "./openai";
 import { prisma } from "./prisma";
+import { SourceCodeEmbedding } from "../../generated/prisma/client";
+
+const SIMILARITY_THRESHOLD = 0.5;
 
 export const pinecone = new Pinecone({
   apiKey: env.PINECONE_API_KEY,
@@ -64,3 +67,67 @@ const generateEmbeddings = async (docs: Document[]) => {
     }),
   );
 };
+
+export const getAskQuestionContext = async (
+  question: string,
+  projectId: string,
+  topK: number = 5,
+  { branch, fileName }: { branch?: string; fileName?: string } = {},
+) => {
+  const questionEmbedding = await openaiService.generateEmbedding(question);
+  console.log(questionEmbedding);
+
+  const response = await index.namespace(projectId).query({
+    vector: questionEmbedding,
+    topK,
+    filter: {
+      branch,
+      fileName,
+    },
+    includeValues: false,
+    includeMetadata: true,
+  });
+
+  console.log(response.matches);
+
+  const matches = response.matches.filter((match) => {
+    if (!match.score) return false;
+    return match.score >= SIMILARITY_THRESHOLD;
+  });
+
+  if (matches.length === 0) {
+    return {
+      context: "",
+      sourceCodeEmbeddings: [],
+    };
+  }
+
+  const sourceCodeEmbeddings = await prisma.sourceCodeEmbedding.findMany({
+    where: {
+      id: {
+        in: matches.map((match) => match.id),
+      },
+    },
+  });
+
+  const context = retrieveContext(sourceCodeEmbeddings);
+
+  return {
+    context,
+    sourceCodeEmbeddings,
+  };
+};
+
+const retrieveContext = (sourceCodeEmbeddings: SourceCodeEmbedding[]) => {
+  if (sourceCodeEmbeddings.length === 0) {
+    return "";
+  }
+
+  return sourceCodeEmbeddings
+    .map((sourceCode) => {
+      return `source: ${sourceCode.fileName}\n content: ${sourceCode.sourceCode} \n summary: ${sourceCode.summary}`;
+    })
+    .join("\n");
+};
+
+// askQuestion("Which file I do post logic?", "cmlyslz5b00003ei0jyxsbse4", 5);

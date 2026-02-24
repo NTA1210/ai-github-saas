@@ -9,7 +9,8 @@
     "lint": "eslint",
     "github:test": "tsx ./src/lib/github.ts",
     "openai:test": "tsx ./src/lib/openai.ts",
-    "github:loader:test": "tsx ./src/lib/github-loader.ts"
+    "github:loader:test": "tsx ./src/lib/github-loader.ts",
+    "pipecone:test": "tsx ./src/lib/pipecone.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.37.5",
@@ -33,6 +34,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.1",
+    "react-markdown": "^10.1.0",
     "server-only": "^0.0.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.1",
