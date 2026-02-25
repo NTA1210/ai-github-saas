@@ -12,10 +12,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { useProjectStore } from "@/store/use-project-store";
 import http from "@/utils/http";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import ReactMarkdown from "react-markdown";
 import { SourceCodeEmbedding } from "../../../../generated/prisma/client";
+import rehypeSanitize from "rehype-sanitize";
+import CodeReferences from "./code-references";
+import MDEditor from "@uiw/react-md-editor";
 
 const AskQuestionCard = () => {
   const { selectedProject } = useProjectStore();
@@ -23,6 +25,29 @@ const AskQuestionCard = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [answer, setAnswer] = useState<string>("");
   const [sources, setSources] = useState<SourceCodeEmbedding[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Giữ ref để cleanup EventSource khi component unmount hoặc dialog đóng
+  const eventSourceRef = useRef<EventSource | null>(null);
+
+  // Cleanup khi component unmount
+  useEffect(() => {
+    return () => {
+      eventSourceRef.current?.close();
+    };
+  }, []);
+
+  const closeStream = () => {
+    eventSourceRef.current?.close();
+    eventSourceRef.current = null;
+  };
+
+  const handleDialogClose = (isOpen: boolean) => {
+    if (!isOpen) {
+      closeStream();
+    }
+    setOpen(isOpen);
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -32,71 +57,100 @@ const AskQuestionCard = () => {
       return;
     }
 
-    const { sessionId } = await http.post<{ sessionId: string }>(
-      `/projects/${selectedProject.id}/ask/sessions`,
-      {
-        question,
-        projectId: selectedProject.id,
-      },
-    );
+    // Đóng stream cũ nếu còn mở
+    closeStream();
 
-    //Open SSE
-    const eventSource = new EventSource(
-      `/api/projects/${selectedProject.id}/ask/stream?sessionId=${sessionId}`,
-    );
+    // Reset state cho lần hỏi mới
+    setAnswer("");
+    setSources([]);
+    setIsLoading(true);
 
-    setOpen(true);
-    let fullAnswer = "";
+    try {
+      const { sessionId } = await http.post<{ sessionId: string }>(
+        `/projects/${selectedProject.id}/ask/sessions`,
+        {
+          question,
+          projectId: selectedProject.id,
+        },
+      );
 
-    eventSource.addEventListener("sources", (event) => {
-      try {
-        const parsedSources = JSON.parse(event.data);
-        console.log(parsedSources);
+      setOpen(true);
 
-        setSources(parsedSources);
-      } catch (e) {
-        console.error("Failed to parse sources", e);
-      }
-    });
+      const eventSource = new EventSource(
+        `/api/projects/${selectedProject.id}/ask/stream?sessionId=${sessionId}`,
+      );
+      eventSourceRef.current = eventSource;
 
-    eventSource.addEventListener("token", (event) => {
-      fullAnswer += event.data;
-      setAnswer(fullAnswer);
-    });
+      let fullAnswer = "";
 
-    // Server gửi event "done", không phải "end"
-    eventSource.addEventListener("done", () => {
-      eventSource.close(); // Đóng để tránh browser tự reconnect → gây lỗi 400
-    });
+      eventSource.addEventListener("sources", (event) => {
+        try {
+          const parsedSources = JSON.parse(event.data);
+          setSources(parsedSources);
+        } catch (e) {
+          console.error("[AskQuestion] Failed to parse sources:", e);
+        }
+      });
 
-    eventSource.addEventListener("error", () => {
-      eventSource.close();
-      toast.error("Something went wrong");
-    });
+      eventSource.addEventListener("token", (event) => {
+        fullAnswer += event.data;
+        setAnswer(fullAnswer);
+        // Tắt loading khi bắt đầu nhận token
+        setIsLoading(false);
+      });
+
+      eventSource.addEventListener("done", () => {
+        setIsLoading(false);
+        closeStream();
+      });
+
+      eventSource.addEventListener("error", (event) => {
+        // Phân biệt lỗi từ server (SSE error event) và lỗi kết nối
+        if (event instanceof MessageEvent) {
+          toast.error("An error occurred while processing the question");
+        } else {
+          // Lỗi kết nối - browser sẽ tự reconnect nếu không close
+          toast.error("Connection lost, please try again");
+        }
+        setIsLoading(false);
+        closeStream();
+      });
+    } catch (err) {
+      console.error("[AskQuestion] Failed to create session:", err);
+      toast.error("Failed to create session, please try again");
+      setIsLoading(false);
+    }
   };
+
   return (
     <>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+      <Dialog open={open} onOpenChange={handleDialogClose}>
+        <DialogContent className="sm:max-w-[80vw]">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
               <Image src="/logo.png" alt="logo" width={40} height={40} />
-              <p>Ask a question</p>
-              <ReactMarkdown>{answer}</ReactMarkdown>
-              {sources.length > 0 && (
-                <div>
-                  <p>Source code</p>
-                  <ul>
-                    {sources.map((source) => (
-                      <li key={source.id}>{source.fileName}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <span>Ask a question</span>
             </DialogTitle>
           </DialogHeader>
+
+          {isLoading && (
+            <div className="flex items-center gap-2 text-muted-foreground text-sm animate-pulse">
+              <span>AI is thinking...</span>
+            </div>
+          )}
+
+          {answer && (
+            <MDEditor.Markdown
+              source={answer}
+              className="max-w-[70vw] h-full! max-h-[40vh] overflow-scroll"
+              rehypePlugins={[rehypeSanitize]}
+            />
+          )}
+
+          <CodeReferences fileReferences={sources} />
         </DialogContent>
       </Dialog>
+
       <Card className="relative col-span-3">
         <CardHeader>
           <CardTitle>Ask a question</CardTitle>
@@ -107,9 +161,12 @@ const AskQuestionCard = () => {
               placeholder="Which file should I edit to change the home page?"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
+              disabled={isLoading}
             />
             <div className="h-4" />
-            <Button type="submit">Ask AI</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Processing..." : "Ask AI"}
+            </Button>
           </form>
         </CardContent>
       </Card>

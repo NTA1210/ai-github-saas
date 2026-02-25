@@ -28,7 +28,8 @@ model User {
 
   credits Int @default(150)
 
-  projects UserToProject[]
+  projects       UserToProject[]
+  questionsAsked Question[]
 }
 
 model Project {
@@ -44,9 +45,10 @@ model Project {
 
   deletedAt DateTime?
 
-  users   UserToProject[]
-  commits Commit[]
+  users                UserToProject[]
+  commits              Commit[]
   sourceCodeEmbeddings SourceCodeEmbedding[]
+  savedQuestions       Question[]
 }
 
 model UserToProject {
@@ -82,7 +84,6 @@ model Commit {
   summary            String?
 }
 
-
 model SourceCodeEmbedding {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
@@ -97,6 +98,37 @@ model SourceCodeEmbedding {
 
   summary String
 
-  @@index([projectId])
   @@unique([projectId, branch, fileName])
+  @@index([projectId])
+}
+
+model AskSession {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId    String
+  projectId String
+  question  String
+
+  // Session tự hết hạn sau 5 phút
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
+model Question {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  question String
+  answer   String
+
+  fileReferences Json?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

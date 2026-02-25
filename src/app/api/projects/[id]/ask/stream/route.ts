@@ -1,8 +1,8 @@
 import { getAskQuestionContext } from "@/lib/pipecone";
 import { NextRequest } from "next/server";
 import openaiService from "@/lib/openai";
-import { sessions } from "../sessions/route";
 import { auth } from "@clerk/nextjs/server";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,64 +15,97 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get("sessionId");
 
-    if (!sessionId || !sessions.has(sessionId)) {
-      console.log("INVALID SESSION");
-
-      return new Response("Invalid session", { status: 400 });
+    if (!sessionId) {
+      return new Response("Missing sessionId", { status: 400 });
     }
 
-    const { question, projectId } = sessions.get(sessionId)!;
+    // Lấy session từ DB và validate
+    const session = await prisma.askSession.findUnique({
+      where: { id: sessionId },
+    });
+
+    if (!session) {
+      return new Response("Invalid or expired session", { status: 400 });
+    }
+
+    // Kiểm tra session có hết hạn chưa
+    if (session.expiresAt < new Date()) {
+      await prisma.askSession
+        .delete({ where: { id: sessionId } })
+        .catch(() => null);
+      return new Response("Session expired", { status: 410 });
+    }
+
+    // Bảo mật: chỉ cho phép owner của session stream
+    if (session.userId !== userId) {
+      return new Response("Forbidden", { status: 403 });
+    }
+
+    const { question, projectId } = session;
+
+    // Xóa session ngay sau khi lấy xong để tránh replay attack
+    await prisma.askSession
+      .delete({ where: { id: sessionId } })
+      .catch(() => null);
 
     const { context, sourceCodeEmbeddings } = await getAskQuestionContext(
       question,
       projectId,
     );
 
-    console.log("Context", context);
-    console.log("Source code embeddings", sourceCodeEmbeddings);
-
-    const stream = await openaiService.generateAskQuestionStreaming(
-      context,
+    const aiStream = await openaiService.generateAskQuestionStreaming(
       question,
+      context,
     );
 
     const encoder = new TextEncoder();
+
     const readableStream = new ReadableStream({
       async start(controller) {
-        // send source code first
-        controller.enqueue(
-          encoder.encode(
-            `event: sources\ndata: ${JSON.stringify(sourceCodeEmbeddings)}\n\n`,
-          ),
-        );
-
-        // send streaming response
-        for await (let chunk of stream) {
-          const token = chunk.choices[0].delta.content;
-          if (token) {
-            controller.enqueue(
-              encoder.encode(`event: token\ndata: ${token}\n\n`),
-            );
+        const send = (event: string, data: string) => {
+          // SSE data can have multiple 'data:' lines which are joined by \n
+          const lines = data.split("\n");
+          let sseMessage = `event: ${event}\n`;
+          for (const line of lines) {
+            sseMessage += `data: ${line}\n`;
           }
+          sseMessage += "\n";
+          controller.enqueue(encoder.encode(sseMessage));
+        };
+
+        try {
+          // Gửi sources trước
+          send("sources", JSON.stringify(sourceCodeEmbeddings));
+
+          // Stream token từ AI
+          for await (const chunk of aiStream) {
+            const token = chunk.choices[0]?.delta?.content;
+            if (token) {
+              send("token", token);
+            }
+          }
+
+          send("done", "end");
+        } catch (streamError) {
+          console.error("[AskStream] Stream error:", streamError);
+          send("error", "Stream interrupted");
+        } finally {
+          controller.close();
         }
-
-        controller.enqueue(encoder.encode(`event: done\ndata: end\n\n`));
-
-        controller.close();
-
-        sessions.delete(sessionId);
       },
     });
 
     return new Response(readableStream, {
       headers: {
         "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
+        "Cache-Control": "no-cache, no-transform",
         Connection: "keep-alive",
+        // Tắt buffering ở Nginx/proxy (quan trọng cho production)
+        "X-Accel-Buffering": "no",
       },
     });
   } catch (error) {
-    console.error(error);
+    console.error("[AskStream] GET error:", error);
     return new Response("Internal Server Error", { status: 500 });
   }
 }

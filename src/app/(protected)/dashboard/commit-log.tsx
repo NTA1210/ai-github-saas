@@ -69,17 +69,7 @@ const CommitLog = () => {
         queryKey: ["commits", selectedProject.id],
       });
 
-      // Trigger summarize cho commit mới
-      toast.promise(http.post(`/projects/${selectedProject.id}/summarize`), {
-        loading: "Summarizing commits...",
-        success: "Commits summarized!",
-        error: "Failed to summarize commits",
-      });
-
-      // Refetch lần 2 sau khi summarize xong
-      await queryClient.invalidateQueries({
-        queryKey: ["commits", selectedProject.id],
-      });
+      // không cần thực hiện summarize ở đây vì đã có useEffect ở trên xử lý rồi
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Sync failed");
     } finally {

@@ -75,26 +75,26 @@ export const getAskQuestionContext = async (
   { branch, fileName }: { branch?: string; fileName?: string } = {},
 ) => {
   const questionEmbedding = await openaiService.generateEmbedding(question);
-  console.log(questionEmbedding);
+
+  // Chỉ thêm filter khi có giá trị, tránh Pinecone lọc sai
+  const filter: Record<string, string> = {};
+  if (branch) filter.branch = branch;
+  if (fileName) filter.fileName = fileName;
 
   const response = await index.namespace(projectId).query({
     vector: questionEmbedding,
     topK,
-    filter: {
-      branch,
-      fileName,
-    },
+    ...(Object.keys(filter).length > 0 && { filter }),
     includeValues: false,
     includeMetadata: true,
   });
 
-  console.log(response.matches);
+  console.log("RESPONSE: ", response.matches);
 
   const matches = response.matches.filter((match) => {
     if (!match.score) return false;
     return match.score >= SIMILARITY_THRESHOLD;
   });
-
   if (matches.length === 0) {
     return {
       context: "",
@@ -129,5 +129,3 @@ const retrieveContext = (sourceCodeEmbeddings: SourceCodeEmbedding[]) => {
     })
     .join("\n");
 };
-
-// askQuestion("Which file I do post logic?", "cmlyslz5b00003ei0jyxsbse4", 5);
