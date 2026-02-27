@@ -6,7 +6,7 @@ import openaiService from "./openai";
 import { prisma } from "./prisma";
 import { SourceCodeEmbedding } from "../../generated/prisma/client";
 
-const SIMILARITY_THRESHOLD = 0.5;
+const SIMILARITY_THRESHOLD = 0.4;
 
 export const pinecone = new Pinecone({
   apiKey: env.PINECONE_API_KEY,

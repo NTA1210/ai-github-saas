@@ -18,6 +18,7 @@ import { SourceCodeEmbedding } from "../../../../generated/prisma/client";
 import rehypeSanitize from "rehype-sanitize";
 import CodeReferences from "./code-references";
 import MDEditor from "@uiw/react-md-editor";
+import { useSaveAnswer } from "@/features/questions/api/saveAnswer";
 
 const AskQuestionCard = () => {
   const { selectedProject } = useProjectStore();
@@ -26,6 +27,7 @@ const AskQuestionCard = () => {
   const [answer, setAnswer] = useState<string>("");
   const [sources, setSources] = useState<SourceCodeEmbedding[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { mutate: saveAnswer, isPending } = useSaveAnswer();
 
   // Giữ ref để cleanup EventSource khi component unmount hoặc dialog đóng
   const eventSourceRef = useRef<EventSource | null>(null);
@@ -122,15 +124,45 @@ const AskQuestionCard = () => {
     }
   };
 
+  const handleSaveAnswer = () => {
+    saveAnswer(
+      {
+        question,
+        answer,
+        projectId: selectedProject?.id!,
+        fileReferences: sources,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Answer saved successfully");
+        },
+        onError: (err) => {
+          toast.error(err.message);
+        },
+      },
+    );
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={handleDialogClose}>
         <DialogContent className="sm:max-w-[80vw]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Image src="/logo.png" alt="logo" width={40} height={40} />
-              <span>Ask a question</span>
-            </DialogTitle>
+            <div className="flex items-center gap-2">
+              <DialogTitle className="flex items-center gap-2">
+                <Image src="/logo.png" alt="logo" width={40} height={40} />
+                <span>Ask a question</span>
+              </DialogTitle>
+              {answer && (
+                <Button
+                  variant={"outline"}
+                  onClick={handleSaveAnswer}
+                  disabled={isPending}
+                >
+                  {isPending ? "Saving..." : "Save answer"}
+                </Button>
+              )}
+            </div>
           </DialogHeader>
 
           {isLoading && (

@@ -57,7 +57,6 @@ export async function GET(request: NextRequest) {
       question,
       context,
     );
-
     const encoder = new TextEncoder();
 
     const readableStream = new ReadableStream({

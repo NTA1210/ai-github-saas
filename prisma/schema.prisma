@@ -98,6 +98,8 @@ model SourceCodeEmbedding {
 
   summary String
 
+  questionReferences QuestionReference[]
+
   @@unique([projectId, branch, fileName])
   @@index([projectId])
 }
@@ -124,11 +126,27 @@ model Question {
   question String
   answer   String
 
-  fileReferences Json?
-
   projectId String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  fileReferences QuestionReference[]
+}
+
+// Bảng trung gian: một câu hỏi có thể tham chiếu nhiều file, một file có thể xuất hiện trong nhiều câu hỏi
+model QuestionReference {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  questionId             String
+  question               Question             @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  sourceCodeEmbeddingId  String
+  sourceCodeEmbedding    SourceCodeEmbedding  @relation(fields: [sourceCodeEmbeddingId], references: [id], onDelete: Cascade)
+
+  @@unique([questionId, sourceCodeEmbeddingId])
+  @@index([questionId])
+  @@index([sourceCodeEmbeddingId])
 }
