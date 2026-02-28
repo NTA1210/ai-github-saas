@@ -75,6 +75,7 @@ export const getAskQuestionContext = async (
   { branch, fileName }: { branch?: string; fileName?: string } = {},
 ) => {
   const questionEmbedding = await openaiService.generateEmbedding(question);
+  console.log("questionEmbedding: ", questionEmbedding);
 
   // Chỉ thêm filter khi có giá trị, tránh Pinecone lọc sai
   const filter: Record<string, string> = {};

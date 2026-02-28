@@ -9,7 +9,6 @@ import {
 import { useGetAllProjects } from "@/features/projects/api/use-get-all-projects";
 import { useProjectStore } from "@/store/use-project-store";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
 
 const ProjectSkeleton = () =>
   Array.from({ length: 3 }).map((_, index) => (
@@ -22,7 +21,6 @@ const Projects = () => {
   const { data, isLoading } = useGetAllProjects();
   const projects = data?.projects ?? [];
   const { open } = useSidebar();
-  const router = useRouter();
 
   const { selectedProject, setSelectedProject } = useProjectStore();
 
@@ -46,7 +44,6 @@ const Projects = () => {
             <SidebarMenuButton
               onClick={() => {
                 setSelectedProject(project);
-                router.push(`/dashboard`);
               }}
               className="cursor-pointer"
             >

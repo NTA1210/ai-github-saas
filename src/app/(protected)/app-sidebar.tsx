@@ -71,7 +71,7 @@ const AppSidebar = () => {
           <Image src={"/logo.png"} alt="Logo" width={40} height={40} />
           {open && (
             <h1 className="text-xl font-bold text-primary/80 truncate">
-              AI Github
+              Github AI
             </h1>
           )}
         </div>

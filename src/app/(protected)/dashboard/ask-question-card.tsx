@@ -18,7 +18,8 @@ import { SourceCodeEmbedding } from "../../../../generated/prisma/client";
 import rehypeSanitize from "rehype-sanitize";
 import CodeReferences from "./code-references";
 import MDEditor from "@uiw/react-md-editor";
-import { useSaveAnswer } from "@/features/questions/api/saveAnswer";
+import { useSaveAnswer } from "@/features/questions/api/save-answer";
+import { useQueryClient } from "@tanstack/react-query";
 
 const AskQuestionCard = () => {
   const { selectedProject } = useProjectStore();
@@ -28,6 +29,7 @@ const AskQuestionCard = () => {
   const [sources, setSources] = useState<SourceCodeEmbedding[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { mutate: saveAnswer, isPending } = useSaveAnswer();
+  const queryClient = useQueryClient();
 
   // Giữ ref để cleanup EventSource khi component unmount hoặc dialog đóng
   const eventSourceRef = useRef<EventSource | null>(null);
@@ -135,6 +137,9 @@ const AskQuestionCard = () => {
       {
         onSuccess: () => {
           toast.success("Answer saved successfully");
+          queryClient.invalidateQueries({
+            queryKey: ["questions", selectedProject?.id],
+          });
         },
         onError: (err) => {
           toast.error(err.message);

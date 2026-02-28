@@ -17,42 +17,25 @@ class OpenAiService {
   summarizeCommit = async (diff: string): Promise<string> => {
     const response = await this.ai.chat.completions.create({
       model: "gpt-4o-mini",
-      temperature: 0.7,
+      temperature: 0,
       messages: [
         {
           role: "system",
-          content: `You are an experienced software engineer. Your task is to generate a concise and meaningful summary of a git diff.
+          content: `You are an expert software engineer. Summarize the following git diff for a developer audience.
 
-Important notes about git diff format:
+RULES:
+- Focus on WHAT changed and WHY it matters (impact), not HOW the code works line-by-line.
+- Each bullet point must start with an action verb (e.g. Add, Remove, Fix, Refactor, Update, Move).
+- Mention specific file names, function names, or component names when relevant.
+- Group related changes into a single bullet instead of listing every file separately.
+- If the diff only contains whitespace, comments, or formatting changes, output: "Style/formatting changes only."
+- If the diff is empty or unreadable, output: "No meaningful changes detected."
+- Maximum 5 bullet points. Each bullet: 1 concise sentence, max 20 words.
 
-For each modified file, the diff contains metadata lines such as:
+OUTPUT FORMAT (plain text, no Markdown headers):
+• [action verb] [what changed] in [file/component] — [impact if non-obvious]
 
-diff --git a/lib/index.js b/lib/index.js
-index aadf691..bfef603 100644
---- a/lib/index.js
-+++ b/lib/index.js
-
-This indicates that the file \`lib/index.js\` was modified in this commit.
-
-Within each diff block:
-- Lines starting with "+" represent added code.
-- Lines starting with "-" represent deleted code.
-- Lines without "+" or "-" are context lines and should not be treated as changes.
-
-Your goal:
-- Summarize the actual changes introduced by the commit.
-- Focus only on meaningful code changes.
-- Ignore metadata and context lines.
-- Do NOT repeat or reference this instruction text in your output.
-
-Formatting requirements:
-- Provide short, clear bullet points.
-- Each bullet should describe a logical change.
-- Mention file names in brackets when helpful.
-- Keep the summary concise.
-
-Now, summarize the following git diff:
-
+Git diff:
 ${diff}`,
         },
       ],
@@ -65,26 +48,32 @@ ${diff}`,
     const code = doc.pageContent.slice(0, 10000);
     const response = await this.ai.chat.completions.create({
       model: "gpt-4o-mini",
-      temperature: 0.7,
+      temperature: 0,
       messages: [
         {
           role: "system",
-          content: `You are a senior software engineer onboarding a junior developer to a new codebase.
+          content: `You are an expert software engineer. Your task is to write a dense, keyword-rich summary of a source code file.
+This summary will be converted into a vector embedding and used for semantic code search (RAG). The quality of the summary directly impacts search accuracy.
 
-Explain the purpose of the file: ${doc.metadata.source}
+File path: ${doc.metadata.source}
 
-Here is the file content:
----
-${code} 
----
+\`\`\`
+${code}
+\`\`\`
 
-Provide:
-1. The main responsibility of this file
-2. How it fits into the overall system (if inferable)
-3. Key functions/classes and what they do (high-level only)
+Write a summary that covers ALL of the following:
+1. **Purpose**: What is the single responsibility of this file?
+2. **Exports**: List all exported functions, classes, types, constants, and hooks by name.
+3. **Key logic**: Describe the main algorithms, data transformations, or business rules implemented.
+4. **Dependencies**: Mention notable imports (libraries, internal modules) this file relies on.
+5. **Side effects**: Does it connect to a database, call an API, modify global state, or emit events?
 
-Keep the explanation concise (max 120 words).
-Do not describe code line-by-line.`,
+RULES:
+- Be specific: use the exact function/class/variable names as they appear in the code.
+- Do NOT use generic descriptions like "handles logic" or "manages state" without specifying what logic or state.
+- Do NOT describe code line-by-line.
+- Keep the summary between 100–200 words.
+- Write in plain English, no Markdown formatting.`,
         },
       ],
     });

@@ -3,9 +3,10 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { dracula } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { SourceCodeEmbedding } from "../../../../generated/prisma/client";
 
 type Props = {
-  fileReferences: { fileName: string; sourceCode: string; summary: string }[];
+  fileReferences: Partial<SourceCodeEmbedding>[];
 };
 
 const CodeReferences = ({ fileReferences }: Props) => {
@@ -13,7 +14,7 @@ const CodeReferences = ({ fileReferences }: Props) => {
 
   useEffect(() => {
     if (fileReferences.length) {
-      setTab(fileReferences[0].fileName);
+      setTab(fileReferences[0]?.fileName || "");
     }
   }, [fileReferences]);
 
@@ -25,7 +26,7 @@ const CodeReferences = ({ fileReferences }: Props) => {
           {fileReferences.map((file) => (
             <button
               key={file.fileName}
-              onClick={() => setTab(file.fileName)}
+              onClick={() => setTab(file.fileName || "")}
               className={cn(
                 "px-3 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap text-muted-foreground hover:bg-muted-foreground hover:text-primary-foreground",
                 {
@@ -40,15 +41,15 @@ const CodeReferences = ({ fileReferences }: Props) => {
         {fileReferences.map((file) => (
           <TabsContent
             key={file.fileName}
-            value={file.fileName}
-            className="max-h-[40vh] overflow-scroll max-w-7xl rounded-md"
+            value={file?.fileName || ""}
+            className="max-h-[40vh] min-h-[40vh] overflow-scroll max-w-7xl rounded-md"
           >
             <SyntaxHighlighter
               language="typescript"
               style={dracula}
               showLineNumbers
             >
-              {file.sourceCode}
+              {file?.sourceCode || ""}
             </SyntaxHighlighter>
           </TabsContent>
         ))}
