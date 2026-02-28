@@ -19,13 +19,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const filePath = `${userId}/${fileName}`;
+    const filePath = `${userId}/${fileName}-${Date.now()}`;
 
     const { data, error } =
       await supabaseStorage.createSignedUploadUrl(filePath);
 
     if (error) {
-      return NextResponse.json({ error: error }, { status: 500 });
+      console.log(error);
+
+      return NextResponse.json({ error: error }, { status: 400 });
     }
 
     return NextResponse.json({ signedUrl: data.signedUrl }, { status: 200 });

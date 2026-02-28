@@ -28,6 +28,7 @@ const envSchema = z.object({
   SUPABASE_PROJECT_URL: z.string(),
   SUPABASE_ANON_KEY: z.string(),
   SUPABASE_BUCKET_NAME: z.string(),
+  SUPABASE_SERVICE_ROLE_KEY: z.string(),
 });
 
 type Env = z.infer<typeof envSchema>;
@@ -67,4 +68,5 @@ export const env: Env = {
   SUPABASE_PROJECT_URL: process.env.SUPABASE_PROJECT_URL!,
   SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY!,
   SUPABASE_BUCKET_NAME: process.env.SUPABASE_BUCKET_NAME!,
+  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY!,
 };
