@@ -150,3 +150,5 @@ model QuestionReference {
   @@index([questionId])
   @@index([sourceCodeEmbeddingId])
 }
+
+

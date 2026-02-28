@@ -23,6 +23,11 @@ const envSchema = z.object({
   // Pinecone
   PINECONE_API_KEY: z.string(),
   PINECONE_INDEX: z.string(),
+
+  // Supabase
+  SUPABASE_PROJECT_URL: z.string(),
+  SUPABASE_ANON_KEY: z.string(),
+  SUPABASE_BUCKET_NAME: z.string(),
 });
 
 type Env = z.infer<typeof envSchema>;
@@ -59,4 +64,7 @@ export const env: Env = {
   GITHUB_PAT: process.env.GITHUB_PAT!,
   PINECONE_API_KEY: process.env.PINECONE_API_KEY!,
   PINECONE_INDEX: process.env.PINECONE_INDEX!,
+  SUPABASE_PROJECT_URL: process.env.SUPABASE_PROJECT_URL!,
+  SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY!,
+  SUPABASE_BUCKET_NAME: process.env.SUPABASE_BUCKET_NAME!,
 };

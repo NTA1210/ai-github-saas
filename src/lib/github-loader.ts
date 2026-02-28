@@ -4,28 +4,43 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+type GithubRepoLoaderOptions = {
+  branch?: string;
+  ignoreFiles?: string[];
+  recursive?: boolean;
+  unknown?: "warn" | "error";
+  maxConcurrency?: number;
+};
+
 export async function loadGithubRepo(
   githubUrl: string,
   githubToken?: string,
+  {
+    branch = "main",
+    ignoreFiles = [
+      "package-lock.json",
+      "yarn.lock",
+      "pnpm-lock.yaml",
+      ".env",
+      ".env.local",
+      ".env.example",
+      ".env.test",
+      ".env.dev",
+      ".env.prod",
+    ],
+    recursive = true,
+    unknown = "warn",
+    maxConcurrency = 5,
+  }: GithubRepoLoaderOptions = {},
 ): Promise<Document[]> {
   try {
     const loader = new GithubRepoLoader(githubUrl, {
       accessToken: githubToken,
-      branch: "main",
-      ignoreFiles: [
-        "package-lock.json",
-        "yarn.lock",
-        "pnpm-lock.yaml",
-        ".env",
-        ".env.local",
-        ".env.example",
-        ".env.test",
-        ".env.dev",
-        ".env.prod",
-      ],
-      recursive: true,
-      unknown: "warn",
-      maxConcurrency: 5,
+      branch,
+      ignoreFiles,
+      recursive,
+      unknown,
+      maxConcurrency,
     });
 
     const docs = await loader.load();
@@ -38,4 +53,6 @@ export async function loadGithubRepo(
   }
 }
 
-// loadGithubRepo("https://github.com/NTA1210/f8-nodejs_day-4");
+// loadGithubRepo(
+//   "https://github.com/FOASDN/BE_FOA",
+// );
