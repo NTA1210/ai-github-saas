@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { useCreateMeeting } from "@/features/meetings/api/create-meeting";
 import { useProjectStore } from "@/store/use-project-store";
 import { useRouter } from "next/navigation";
+import useRefetch from "@/hooks/useRefetch";
+import { useCreateIssues } from "@/features/issues/api/create-issues";
 
 const MeetingCard = () => {
   const [progress, setProgress] = useState(0);
@@ -47,6 +49,10 @@ const MeetingCard = () => {
     },
   });
   const router = useRouter();
+  const refetch = useRefetch({
+    targetQueryKey: ["meetings", selectedProject?.id],
+  });
+  const { mutate: createIssues } = useCreateIssues();
 
   const handleUpload = async (file: File) => {
     const fileName = file.name;
@@ -78,14 +84,10 @@ const MeetingCard = () => {
                 onSuccess: (meeting) => {
                   toast.success("Meeting created! Processing in background...");
                   router.push("/meetings");
-                  setIsPending(false);
+                  refetch();
 
                   // Fire-and-forget: xử lý AI ở background, không block UI
-                  void fetch("/api/issues", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ meetingId: meeting.id }),
-                  });
+                  void createIssues(meeting.id);
                 },
                 onError: () => {
                   toast.error("Failed to create meeting");

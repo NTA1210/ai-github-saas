@@ -7,8 +7,10 @@ import { Spinner } from "@/components/ui/spinner";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useDeleteMeeting } from "@/features/meetings/api/delete-meeting";
+import useRefetch from "@/hooks/useRefetch";
 
 const MeetingsPage = () => {
   const { selectedProject } = useProjectStore();
@@ -17,6 +19,11 @@ const MeetingsPage = () => {
 
   // Lưu trạng thái cũ của từng meeting để phát hiện khi nào PROCESSING → COMPLETED
   const prevStatusRef = useRef<Record<string, string>>({});
+  const { mutateAsync: deleteMeeting } = useDeleteMeeting();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const refetch = useRefetch({
+    targetQueryKey: ["meetings", selectedProject?.id],
+  });
 
   useEffect(() => {
     if (!meetings) return;
@@ -47,6 +54,22 @@ const MeetingsPage = () => {
 
   // Dừng polling khi tất cả meetings đã xong (không còn PROCESSING)
   const hasProcessing = meetings?.some((m) => m.status === "PROCESSING");
+
+  const handleDeleteMeeting = useCallback(
+    async (id: string) => {
+      setDeletingId(id);
+      try {
+        await deleteMeeting(id);
+        toast.success("Meeting deleted");
+        await refetch();
+      } catch {
+        toast.error("Failed to delete meeting");
+      } finally {
+        setDeletingId(null);
+      }
+    },
+    [deleteMeeting, refetch],
+  );
 
   return (
     <div>
@@ -105,10 +128,29 @@ const MeetingsPage = () => {
               </div>
             </div>
 
-            <div className="">
+            <div className="flex items-center gap-x-4">
               <Link href={`/meetings/${meeting.id}`}>
-                <Button variant={"outline"}>View Meeting</Button>
+                <Button
+                  size={"sm"}
+                  variant={"outline"}
+                  disabled={
+                    meeting.status === "PROCESSING" || deletingId === meeting.id
+                  }
+                >
+                  View Meeting
+                </Button>
               </Link>
+              <Button
+                size={"sm"}
+                variant={"destructive"}
+                disabled={deletingId === meeting.id}
+                onClick={() => handleDeleteMeeting(meeting.id)}
+              >
+                {deletingId === meeting.id && (
+                  <Spinner className="mr-2 size-4" />
+                )}
+                Delete Meeting
+              </Button>
             </div>
           </li>
         ))}
