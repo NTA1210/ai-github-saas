@@ -8,10 +8,15 @@ import { useDropzone, FileRejection } from "react-dropzone";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import { useUploadFile } from "@/features/uploads/api/upload-file";
 import { toast } from "sonner";
+import { useCreateMeeting } from "@/features/meetings/api/create-meeting";
+import { useProjectStore } from "@/store/use-project-store";
+import { useRouter } from "next/navigation";
 
 const MeetingCard = () => {
   const [progress, setProgress] = useState(0);
+  const { selectedProject } = useProjectStore();
   const { mutate: uploadFile } = useUploadFile();
+  const { mutate: createMeeting } = useCreateMeeting();
   const [isPending, setIsPending] = useState(false);
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
@@ -41,35 +46,60 @@ const MeetingCard = () => {
       setIsPending(false);
     },
   });
+  const router = useRouter();
 
   const handleUpload = async (file: File) => {
-    uploadFile(file.name, {
-      onSuccess: (data) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", data.signedUrl);
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const percent = Math.round((event.loaded / event.total) * 100);
+    const fileName = file.name;
+    uploadFile(
+      {
+        fileName,
+        projectId: selectedProject!.id,
+      },
+      {
+        onSuccess: (data) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("PUT", data.signedUrl);
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              const percent = Math.round((event.loaded / event.total) * 100);
 
-            setProgress(percent);
-          }
-        };
-        xhr.onload = () => {
-          console.log("Upload complete");
-          toast.success("Upload complete");
+              setProgress(percent);
+            }
+          };
+          xhr.onload = () => {
+            const fileUrl = data.signedUrl.split("?")[0];
+            createMeeting(
+              {
+                projectId: selectedProject!.id,
+                meetingUrl: fileUrl,
+                name: fileName,
+              },
+              {
+                onSuccess: () => {
+                  toast.success("Meeting created successfully");
+                  router.push("/meetings");
+                },
+                onError: () => {
+                  toast.error("Failed to create meeting");
+                },
+                onSettled: () => {
+                  setIsPending(false);
+                },
+              },
+            );
+          };
+          xhr.onerror = () => {
+            toast.error("Upload failed.");
+            setIsPending(false);
+          };
+          xhr.send(file);
+        },
+        onError: () => {
+          toast.error("Failed to get upload URL.");
           setIsPending(false);
-        };
-        xhr.onerror = () => {
-          toast.error("Upload failed.");
-          setIsPending(false);
-        };
-        xhr.send(file);
+        },
       },
-      onError: () => {
-        toast.error("Failed to get upload URL.");
-        setIsPending(false);
-      },
-    });
+    );
   };
 
   return (

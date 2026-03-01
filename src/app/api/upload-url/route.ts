@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { fileName } = await req.json();
+    const { fileName, projectId } = await req.json();
 
     if (!fileName) {
       return NextResponse.json(
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const filePath = `${userId}/${fileName}-${Date.now()}`;
+    const filePath = `${userId}/${projectId}/${fileName}-${Date.now()}`;
 
     const { data, error } =
       await supabaseStorage.createSignedUploadUrl(filePath);

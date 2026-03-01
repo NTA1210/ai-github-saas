@@ -16,7 +16,7 @@ importers:
         version: 5.2.2(react-hook-form@7.71.2(react@19.2.3))
       '@langchain/community':
         specifier: ^1.1.17
-        version: 1.1.17(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.58.2)(deepmerge@4.3.1)(dotenv@16.6.1)(openai@6.25.0(ws@8.19.0)(zod@4.3.6))(zod@4.3.6))(@ibm-cloud/watsonx-ai@1.7.8)(@langchain/core@1.1.27(openai@6.25.0(ws@8.19.0)(zod@4.3.6)))(@pinecone-database/pinecone@7.1.0)(@supabase/supabase-js@2.98.0)(ibm-cloud-sdk-core@5.4.7)(ignore@7.0.5)(jsonwebtoken@9.0.3)(openai@6.25.0(ws@8.19.0)(zod@4.3.6))(pg@8.18.0)(playwright@1.58.2)(ws@8.19.0)
+        version: 1.1.17(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.58.2)(deepmerge@4.3.1)(dotenv@16.6.1)(openai@6.25.0(ws@8.19.0)(zod@4.3.6))(zod@4.3.6))(@ibm-cloud/watsonx-ai@1.7.8)(@langchain/core@1.1.27(openai@6.25.0(ws@8.19.0)(zod@4.3.6)))(@pinecone-database/pinecone@7.1.0)(@supabase/supabase-js@2.98.0)(assemblyai@4.23.1)(ibm-cloud-sdk-core@5.4.7)(ignore@7.0.5)(jsonwebtoken@9.0.3)(openai@6.25.0(ws@8.19.0)(zod@4.3.6))(pg@8.18.0)(playwright@1.58.2)(ws@8.19.0)
       '@langchain/core':
         specifier: ^1.1.27
         version: 1.1.27(openai@6.25.0(ws@8.19.0)(zod@4.3.6))
@@ -41,6 +41,9 @@ importers:
       '@uiw/react-md-editor':
         specifier: ^4.0.11
         version: 4.0.11(@types/react@19.2.14)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      assemblyai:
+        specifier: ^4.23.1
+        version: 4.23.1
       axios:
         specifier: ^1.13.5
         version: 1.13.5(debug@4.4.3)
@@ -2707,6 +2710,10 @@ packages:
   arraybuffer.prototype.slice@1.0.4:
     resolution: {integrity: sha512-BNoCY6SXXPQ7gF2opIP4GBE+Xw7U+pHMYKuzjgCN3GwiaIR09UUeKfheyIry77QtrCBlC0KK0q5/TER/tYh3PQ==}
     engines: {node: '>= 0.4'}
+
+  assemblyai@4.23.1:
+    resolution: {integrity: sha512-bXV8mNuZdLiZhCM3QVWkG2p03kjkISXXYPN5RJUrx+h7z1h67CyE2zE+CESp+opCiVcr69tOykfXlqTFTJEBsQ==}
+    engines: {node: '>=18'}
 
   ast-types-flow@0.0.8:
     resolution: {integrity: sha512-OH/2E5Fg20h2aPrbe+QL8JZQFko0YZaF+j4mnQ7BGhfavO7OpSLa8a0y9sBwomHdSbkhTS8TQNayBfnW5DwbvQ==}
@@ -6604,7 +6611,7 @@ snapshots:
       - openai
       - ws
 
-  '@langchain/community@1.1.17(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.58.2)(deepmerge@4.3.1)(dotenv@16.6.1)(openai@6.25.0(ws@8.19.0)(zod@4.3.6))(zod@4.3.6))(@ibm-cloud/watsonx-ai@1.7.8)(@langchain/core@1.1.27(openai@6.25.0(ws@8.19.0)(zod@4.3.6)))(@pinecone-database/pinecone@7.1.0)(@supabase/supabase-js@2.98.0)(ibm-cloud-sdk-core@5.4.7)(ignore@7.0.5)(jsonwebtoken@9.0.3)(openai@6.25.0(ws@8.19.0)(zod@4.3.6))(pg@8.18.0)(playwright@1.58.2)(ws@8.19.0)':
+  '@langchain/community@1.1.17(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.58.2)(deepmerge@4.3.1)(dotenv@16.6.1)(openai@6.25.0(ws@8.19.0)(zod@4.3.6))(zod@4.3.6))(@ibm-cloud/watsonx-ai@1.7.8)(@langchain/core@1.1.27(openai@6.25.0(ws@8.19.0)(zod@4.3.6)))(@pinecone-database/pinecone@7.1.0)(@supabase/supabase-js@2.98.0)(assemblyai@4.23.1)(ibm-cloud-sdk-core@5.4.7)(ignore@7.0.5)(jsonwebtoken@9.0.3)(openai@6.25.0(ws@8.19.0)(zod@4.3.6))(pg@8.18.0)(playwright@1.58.2)(ws@8.19.0)':
     dependencies:
       '@browserbasehq/stagehand': 1.14.0(@playwright/test@1.58.2)(deepmerge@4.3.1)(dotenv@16.6.1)(openai@6.25.0(ws@8.19.0)(zod@4.3.6))(zod@4.3.6)
       '@ibm-cloud/watsonx-ai': 1.7.8
@@ -6623,6 +6630,7 @@ snapshots:
       '@browserbasehq/sdk': 2.6.0
       '@pinecone-database/pinecone': 7.1.0
       '@supabase/supabase-js': 2.98.0
+      assemblyai: 4.23.1
       ignore: 7.0.5
       jsonwebtoken: 9.0.3
       pg: 8.18.0
@@ -8239,6 +8247,13 @@ snapshots:
       es-errors: 1.3.0
       get-intrinsic: 1.3.0
       is-array-buffer: 3.0.5
+
+  assemblyai@4.23.1:
+    dependencies:
+      ws: 8.19.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   ast-types-flow@0.0.8: {}
 

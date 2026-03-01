@@ -29,6 +29,9 @@ const envSchema = z.object({
   SUPABASE_ANON_KEY: z.string(),
   SUPABASE_BUCKET_NAME: z.string(),
   SUPABASE_SERVICE_ROLE_KEY: z.string(),
+
+  // AssemblyAI
+  ASSEMBLY_AI_API_KEY: z.string(),
 });
 
 type Env = z.infer<typeof envSchema>;
@@ -69,4 +72,5 @@ export const env: Env = {
   SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY!,
   SUPABASE_BUCKET_NAME: process.env.SUPABASE_BUCKET_NAME!,
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  ASSEMBLY_AI_API_KEY: process.env.ASSEMBLY_AI_API_KEY!,
 };

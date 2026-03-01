@@ -1,15 +1,9 @@
 import { QueryKey, useQueryClient } from "@tanstack/react-query";
 
-const useRefetch = ({
-  targetQueryKey,
-  type,
-}: {
-  targetQueryKey: QueryKey;
-  type?: "all" | "active" | "inactive";
-}) => {
+const useRefetch = ({ targetQueryKey }: { targetQueryKey: QueryKey }) => {
   const queryClient = useQueryClient();
   return async () => {
-    await queryClient.refetchQueries({ queryKey: targetQueryKey, type });
+    await queryClient.invalidateQueries({ queryKey: targetQueryKey });
   };
 };
 
