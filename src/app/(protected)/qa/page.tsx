@@ -8,7 +8,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useGetQuestions } from "@/features/questions/api/get-questions";
+import { useGetQuestions } from "@/features/questions/api/use-get-questions";
 import { useProjectStore } from "@/store/use-project-store";
 import AskQuestionCard from "../dashboard/ask-question-card";
 import React, { useEffect, useState } from "react";

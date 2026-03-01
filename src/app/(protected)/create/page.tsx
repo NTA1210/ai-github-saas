@@ -37,8 +37,8 @@ const CreateProjectPage = () => {
       onSuccess: async ({ project }) => {
         toast.success(`Project "${project.name}" created!`);
         reset();
-        await refetch();
         setSelectedProject(project);
+        refetch();
         router.push(`/dashboard`);
 
         // Không trigger summarize ở đây — commit-log.tsx tự detect

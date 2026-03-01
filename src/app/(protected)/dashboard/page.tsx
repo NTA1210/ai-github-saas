@@ -6,6 +6,7 @@ import Link from "next/link";
 import CommitLog from "./commit-log";
 import AskQuestionCard from "./ask-question-card";
 import MeetingCard from "./meeting-card";
+import ArchiveButton from "./archive-button";
 
 export default function DashboardPage() {
   const { selectedProject } = useProjectStore();
@@ -38,7 +39,7 @@ export default function DashboardPage() {
         <div className="h-4"></div>
 
         <div className="flex items-center gap-4">
-          Team member InviteButton AchiveButton
+          Team member InviteButton <ArchiveButton />
         </div>
       </div>
       <div className="mt-4">

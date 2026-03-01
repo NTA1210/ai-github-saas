@@ -18,7 +18,7 @@ import { SourceCodeEmbedding } from "../../../../generated/prisma/client";
 import rehypeSanitize from "rehype-sanitize";
 import CodeReferences from "./code-references";
 import MDEditor from "@uiw/react-md-editor";
-import { useSaveAnswer } from "@/features/questions/api/save-answer";
+import { useSaveAnswer } from "@/features/questions/api/use-save-answer";
 import { useQueryClient } from "@tanstack/react-query";
 
 const AskQuestionCard = () => {

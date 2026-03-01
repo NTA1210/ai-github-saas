@@ -12,11 +12,12 @@ export const useProjectStore = create<ProjectStore>()(
   persist(
     (set) => ({
       selectedProject: null,
-      setSelectedProject: (project) => set({ selectedProject: project }),
+      setSelectedProject: (project: Project) =>
+        set({ selectedProject: project }),
       clearSelectedProject: () => set({ selectedProject: null }),
     }),
     {
-      name: "selected-project", // key
+      name: "selected-project",
     },
   ),
 );

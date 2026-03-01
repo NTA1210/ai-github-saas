@@ -104,6 +104,7 @@ export async function GET(req: NextRequest) {
       users: {
         some: { userId: user.id },
       },
+      deletedAt: null,
     },
   });
 

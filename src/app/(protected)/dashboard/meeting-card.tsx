@@ -6,7 +6,7 @@ import { Presentation, Upload } from "lucide-react";
 import { useState } from "react";
 import { useDropzone, FileRejection } from "react-dropzone";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
-import { useUploadFile } from "@/features/uploads/api/upload-file";
+import { useUploadFile } from "@/features/uploads/api/use-upload-file";
 import { toast } from "sonner";
 import { useCreateMeeting } from "@/features/meetings/api/create-meeting";
 import { useProjectStore } from "@/store/use-project-store";

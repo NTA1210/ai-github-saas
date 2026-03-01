@@ -10,7 +10,6 @@ import { useGetAllProjects } from "@/features/projects/api/use-get-all-projects"
 import { useProjectStore } from "@/store/use-project-store";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
-
 const ProjectSkeleton = () =>
   Array.from({ length: 3 }).map((_, index) => (
     <SidebarMenuItem key={index}>
@@ -29,7 +28,7 @@ const Projects = () => {
     if (projects.length > 0 && !selectedProject) {
       setSelectedProject(projects[0]);
     }
-  }, [projects, selectedProject]);
+  }, [projects]);
 
   if (isLoading) return <ProjectSkeleton />;
 
