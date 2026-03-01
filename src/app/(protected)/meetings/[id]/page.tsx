@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { notFound, redirect } from "next/navigation";
 import IssuesList from "./issues-list";
+import { VideoIcon } from "lucide-react";
 
 const MeetingDetailPage = async ({
   params,
@@ -21,23 +22,25 @@ const MeetingDetailPage = async ({
   if (!meeting) notFound();
 
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-6">
-        <h1 className="text-2xl font-bold">{meeting.name}</h1>
-        <span
-          className={`text-xs px-2 py-1 rounded-full font-medium ${
-            meeting.status === "COMPLETED"
-              ? "bg-green-100 text-green-700"
-              : "bg-yellow-100 text-yellow-700"
-          }`}
-        >
-          {meeting.status}
-        </span>
+    <div className="p-8">
+      <div className="mx-auto flex max-w-2xl items-center justify-between gap-x-8 border-b pb-6 lg:mx-0 lg:max-w-none">
+        <div className="flex items-center gap-x-6">
+          <div className="rounded-full border bg-white p-3">
+            <VideoIcon className="size-6" />
+          </div>
+          <h1>
+            <div className="text-sm leading-6 text-gray-600">
+              Meeting on {""}
+              {new Date(meeting.createdAt).toLocaleDateString()}
+            </div>
+            <div className="mt-1 text-base font-semibold leading-6 text-gray-900">
+              {meeting.name}
+            </div>
+          </h1>
+        </div>
       </div>
 
-      <p className="text-sm text-muted-foreground mb-6">
-        {new Date(meeting.createdAt).toLocaleString()}
-      </p>
+      <div className="h-4"></div>
 
       <IssuesList issues={meeting.issues} />
     </div>
