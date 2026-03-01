@@ -50,6 +50,7 @@ model Project {
   sourceCodeEmbeddings SourceCodeEmbedding[]
   savedQuestions       Question[]
   meetings             Meeting[]
+  inviteLinks          InviteLink[]
 }
 
 model UserToProject {
@@ -189,4 +190,18 @@ model Issue {
 enum MeetingStatus {
   PROCESSING
   COMPLETED
+}
+
+model InviteLink {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  expiresAt DateTime
+
+  @@index([expiresAt])
 }

@@ -40,10 +40,6 @@ export function DashboardSkeleton() {
 export function QASkeleton() {
   return (
     <div className="space-y-4">
-      {/* Ask question card */}
-      <Skeleton className="h-32 w-full rounded-xl" />
-      <Skeleton className="h-6 w-40" />
-
       {/* Question items */}
       {Array.from({ length: 4 }).map((_, i) => (
         <div

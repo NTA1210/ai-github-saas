@@ -29,49 +29,52 @@ const QAPage = () => {
     setQuestionIndex(0);
   }, [selectedProject?.id]);
 
-  if (isLoading) return <QASkeleton />;
-
   return (
     <Sheet>
       <AskQuestionCard />
       <div className="h-4"></div>
       <h1 className="text-xl font-semibold">Saved Questions</h1>
       <div className="h-2"></div>
-      <div className="flex flex-col gap-2">
-        {questions?.map((question, index) => {
-          return (
-            <React.Fragment key={question.id}>
-              <SheetTrigger
-                onClick={() => {
-                  setQuestionIndex(index);
-                }}
-              >
-                <div className="flex items-center gap-4 bg-white rounded-lg p-4 shadow border">
-                  <img
-                    className="rounded-full"
-                    width={30}
-                    height={30}
-                    src={question?.user?.imageUrl || ""}
-                  />
-                  <div className="text-left flex flex-col">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-gray-700 line-clamp-1 text-lg font-medium">
-                        {question?.question}
+
+      {isLoading ? (
+        <QASkeleton />
+      ) : (
+        <div className="flex flex-col gap-2">
+          {questions?.map((question, index) => {
+            return (
+              <React.Fragment key={question.id}>
+                <SheetTrigger
+                  onClick={() => {
+                    setQuestionIndex(index);
+                  }}
+                >
+                  <div className="flex items-center gap-4 bg-white rounded-lg p-4 shadow border cursor-pointer hover:bg-gray-100 transition-colors duration-200">
+                    <img
+                      className="rounded-full"
+                      width={30}
+                      height={30}
+                      src={question?.user?.imageUrl || ""}
+                    />
+                    <div className="text-left flex flex-col">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-gray-700 line-clamp-1 text-lg font-medium">
+                          {question?.question}
+                        </p>
+                        <span className="text-xs text-gray-400 whitespace-nowrap">
+                          {new Date(question?.createdAt).toLocaleString()}
+                        </span>
+                      </div>
+                      <p className="text-gray-500 line-clamp-1 text-sm">
+                        {question?.answer}
                       </p>
-                      <span className="text-xs text-gray-400 whitespace-nowrap">
-                        {new Date(question?.createdAt).toLocaleString()}
-                      </span>
                     </div>
-                    <p className="text-gray-500 line-clamp-1 text-sm">
-                      {question?.answer}
-                    </p>
                   </div>
-                </div>
-              </SheetTrigger>
-            </React.Fragment>
-          );
-        })}
-      </div>
+                </SheetTrigger>
+              </React.Fragment>
+            );
+          })}
+        </div>
+      )}
 
       {currentQuestion && (
         <SheetContent className="sm:max-w-[80vw] h-full flex flex-col">

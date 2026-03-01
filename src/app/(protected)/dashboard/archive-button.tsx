@@ -67,9 +67,11 @@ const ArchiveButton = () => {
       </Dialog>
 
       <Button
+        size="sm"
         variant="destructive"
         disabled={isPending}
         onClick={() => setOpen(true)}
+        className="cursor-pointer"
       >
         Archive
       </Button>
