@@ -15,6 +15,7 @@ import React, { useEffect, useState } from "react";
 import MDEditor from "@uiw/react-md-editor";
 import rehypeSanitize from "rehype-sanitize";
 import CodeReferences from "../dashboard/code-references";
+import { QASkeleton } from "@/components/ui/page-skeletons";
 
 const QAPage = () => {
   const { selectedProject } = useProjectStore();
@@ -28,9 +29,8 @@ const QAPage = () => {
     setQuestionIndex(0);
   }, [selectedProject?.id]);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  if (isLoading) return <QASkeleton />;
+
   return (
     <Sheet>
       <AskQuestionCard />

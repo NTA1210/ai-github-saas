@@ -10,30 +10,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { fileName, projectId } = await req.json();
+    const { filePath } = await req.json();
 
-    if (!fileName) {
+    if (!filePath) {
       return NextResponse.json(
-        { error: "File name is required" },
+        { error: "File path is required" },
         { status: 400 },
       );
     }
 
-    const filePath = `${userId}/${projectId}/${fileName}-${Date.now()}`;
-
-    const { data, error } =
-      await supabaseStorage.createSignedUploadUrl(filePath);
+    const { data, error } = await supabaseStorage.createSignedUrl(filePath, 60);
 
     if (error) {
       console.log(error);
-
       return NextResponse.json({ error: error }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { signedUrl: data.signedUrl, filePath },
-      { status: 200 },
-    );
+    return NextResponse.json({ signedUrl: data.signedUrl }, { status: 200 });
   } catch (error) {
     console.log(error);
     return NextResponse.json({ error: error }, { status: 500 });

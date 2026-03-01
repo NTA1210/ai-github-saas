@@ -12,8 +12,6 @@ export async function POST(req: NextRequest) {
 
     const { projectId, meetingUrl, name } = await req.json();
 
-    console.log(projectId, meetingUrl, name);
-
     if (!projectId) {
       return NextResponse.json(
         { error: "Project ID is required" },

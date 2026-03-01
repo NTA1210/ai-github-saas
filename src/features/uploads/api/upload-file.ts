@@ -7,11 +7,14 @@ export const uploadFile = async ({
 }: {
   fileName: string;
   projectId: string;
-}): Promise<{ signedUrl: string }> => {
-  const response = await http.post<{ signedUrl: string }>("/upload-url", {
-    fileName,
-    projectId,
-  });
+}): Promise<{ signedUrl: string; filePath: string }> => {
+  const response = await http.post<{ signedUrl: string; filePath: string }>(
+    "/upload-url",
+    {
+      fileName,
+      projectId,
+    },
+  );
   return response;
 };
 

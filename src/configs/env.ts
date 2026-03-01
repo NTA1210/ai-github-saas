@@ -32,6 +32,10 @@ const envSchema = z.object({
 
   // AssemblyAI
   ASSEMBLY_AI_API_KEY: z.string(),
+
+  // Inngest (optional khi dev local, bắt buộc ở production)
+  INNGEST_EVENT_KEY: z.string().optional(),
+  INNGEST_SIGNING_KEY: z.string().optional(),
 });
 
 type Env = z.infer<typeof envSchema>;
@@ -73,4 +77,6 @@ export const env: Env = {
   SUPABASE_BUCKET_NAME: process.env.SUPABASE_BUCKET_NAME!,
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY!,
   ASSEMBLY_AI_API_KEY: process.env.ASSEMBLY_AI_API_KEY!,
+  INNGEST_EVENT_KEY: process.env.INNGEST_EVENT_KEY,
+  INNGEST_SIGNING_KEY: process.env.INNGEST_SIGNING_KEY,
 };

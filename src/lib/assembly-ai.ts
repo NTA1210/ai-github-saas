@@ -49,6 +49,6 @@ export const processingMeeting = async (meetingUrl: string) => {
   };
 };
 
-processingMeeting(audioFile).then((res) => {
-  console.log(res);
-});
+// processingMeeting(audioFile).then((res) => {
+//   console.log(res);
+// });

@@ -67,7 +67,7 @@ const MeetingCard = () => {
             }
           };
           xhr.onload = () => {
-            const fileUrl = data.signedUrl.split("?")[0];
+            const fileUrl = data.filePath;
             createMeeting(
               {
                 projectId: selectedProject!.id,
@@ -75,9 +75,17 @@ const MeetingCard = () => {
                 name: fileName,
               },
               {
-                onSuccess: () => {
-                  toast.success("Meeting created successfully");
+                onSuccess: (meeting) => {
+                  toast.success("Meeting created! Processing in background...");
                   router.push("/meetings");
+                  setIsPending(false);
+
+                  // Fire-and-forget: xử lý AI ở background, không block UI
+                  void fetch("/api/issues", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ meetingId: meeting.id }),
+                  });
                 },
                 onError: () => {
                   toast.error("Failed to create meeting");

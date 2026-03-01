@@ -9,10 +9,13 @@ import http from "@/utils/http";
 import { useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const CommitLog = () => {
   const { selectedProject } = useProjectStore();
-  const { data: commits } = useGetAllCommits(selectedProject?.id || "");
+  const { data: commits, isLoading } = useGetAllCommits(
+    selectedProject?.id || "",
+  );
   const queryClient = useQueryClient();
   const [syncing, setSyncing] = useState<boolean>(false);
   // Ref tránh trigger summarize nhiều lần cho cùng 1 project
@@ -76,6 +79,23 @@ const CommitLog = () => {
       setSyncing(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <ul className="space-y-6">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <li key={i} className="flex gap-4">
+            <Skeleton className="size-10 rounded-full shrink-0" />
+            <div className="flex-1 space-y-2 pt-1">
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-3 w-4/5" />
+            </div>
+          </li>
+        ))}
+      </ul>
+    );
+  }
 
   return (
     <>

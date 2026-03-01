@@ -10,7 +10,7 @@ export const createMeeting = async ({
   meetingUrl: string;
   name: string;
 }) => {
-  return await http.post("/meetings", {
+  return await http.post<{ id: string }>("/meetings", {
     projectId,
     meetingUrl,
     name,

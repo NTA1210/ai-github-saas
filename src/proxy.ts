@@ -11,10 +11,7 @@ const isPublicPage = createRouteMatcher([
 
 // ✅ Public API Routes — ai cũng gọi được (không cần đăng nhập)
 const isPublicApi = createRouteMatcher([
-  // Ví dụ:
-  // "/api/posts(.*)",      // GET danh sách bài viết public
-  // "/api/contact(.*)",    // Form liên hệ
-  // Thêm API public khác ở đây...
+  "/api/inngest(.*)", // Inngest Dev Server & Cloud cần gọi route này để sync functions
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
