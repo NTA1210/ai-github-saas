@@ -1,41 +1,41 @@
-import { prisma } from "@/lib/prisma";
-import { auth, clerkClient } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+"use client";
 
-const SyncUser = async () => {
-  const { userId } = await auth();
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { syncUserToDb } from "./action";
 
-  if (!userId) {
-    throw new Error("User not found");
-  }
+const SyncUser = () => {
+  const { isLoaded, isSignedIn, userId } = useAuth();
+  const router = useRouter();
+  const hasSynced = useRef(false);
 
-  const client = await clerkClient();
-  const user = await client.users.getUser(userId);
-  const emailAddress = user.emailAddresses[0].emailAddress;
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn || !userId) return;
 
-  if (!emailAddress) {
-    throw new Error("Email not found");
-  }
+    if (hasSynced.current) return;
+    hasSynced.current = true;
 
-  await prisma.user.upsert({
-    where: {
-      emailAddress,
-    },
-    update: {
-      imageUrl: user.imageUrl,
-      firstName: user.firstName,
-      lastName: user.lastName,
-    },
-    create: {
-      clerkId: userId,
-      emailAddress,
-      imageUrl: user.imageUrl,
-      firstName: user.firstName,
-      lastName: user.lastName,
-    },
-  });
+    syncUserToDb()
+      .catch((err) => {
+        console.error("[sync-user] Failed to sync:", err);
+      })
+      .finally(() => {
+        router.replace("/dashboard");
+      });
+  }, [isLoaded, isSignedIn, userId, router]);
 
-  return redirect("/dashboard");
+  // Loading screen trong lúc đợi sync
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <p className="text-sm text-muted-foreground">
+          Setting up your account...
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export default SyncUser;

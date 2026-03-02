@@ -11,6 +11,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useDeleteMeeting } from "@/features/meetings/api/delete-meeting";
 import useRefetch from "@/hooks/useRefetch";
+import NoProjectSelected from "@/components/ui/no-project-selected";
 
 const MeetingsPage = () => {
   const { selectedProject } = useProjectStore();
@@ -70,6 +71,20 @@ const MeetingsPage = () => {
     },
     [deleteMeeting, refetch],
   );
+
+  if (!selectedProject) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="opacity-40 pointer-events-none select-none">
+          <MeetingCard />
+        </div>
+        <NoProjectSelected
+          title="No project selected"
+          description="Select a project from the sidebar to view and manage meetings."
+        />
+      </div>
+    );
+  }
 
   return (
     <div>

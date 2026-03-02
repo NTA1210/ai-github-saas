@@ -118,13 +118,17 @@ const CommitLog = () => {
       </div>
 
       <ul className="space-y-6">
-        {commits?.map((commit, commitIndex) => (
-          <CommitLogItem
-            key={commit.id}
-            commit={commit}
-            isLast={commitIndex === commits.length - 1}
-          />
-        ))}
+        {commits && commits.length > 0 ? (
+          commits?.map((commit, commitIndex) => (
+            <CommitLogItem
+              key={commit.id}
+              commit={commit}
+              isLast={commitIndex === commits.length - 1}
+            />
+          ))
+        ) : (
+          <p className="text-center text-muted-foreground">No commits found</p>
+        )}
       </ul>
     </>
   );

@@ -13,6 +13,7 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { getProjectById } from "@/features/projects/api/use-get-project";
 import { useRouter } from "next/navigation";
+import NoProjectSelected from "@/components/ui/no-project-selected";
 
 export default function DashboardPage() {
   const { selectedProject, setSelectedProject } = useProjectStore();
@@ -33,12 +34,25 @@ export default function DashboardPage() {
     }
   }, [errorCode, projectId, setSelectedProject, router]);
 
-  if (!selectedProject) return null;
+  // ─── Empty State — chưa có project nào ───────────────────────────────────
+  if (!selectedProject) {
+    return (
+      <div className="flex flex-col gap-6">
+        {/* Cards hiển thị nhưng bị mờ và không click được */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-5 opacity-40 pointer-events-none select-none">
+          <AskQuestionCard />
+          <MeetingCard />
+        </div>
+        <NoProjectSelected />
+      </div>
+    );
+  }
 
+  // ─── Full Dashboard — đã có project ──────────────────────────────────────
   return (
     <div>
       <div className="flex items-center justify-between flex-wrap gap-y-4">
-        {/* github link */}
+        {/* Github link */}
         <div className="w-fit rounded-md bg-primary px-4 py-3">
           <div className="flex items-center">
             <Github className="size-5 text-white" />
@@ -64,11 +78,15 @@ export default function DashboardPage() {
           Team member <InviteButton /> <ArchiveButton />
         </div>
       </div>
+
+      {/* Cards */}
       <div className="mt-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
           <AskQuestionCard /> <MeetingCard />
         </div>
       </div>
+
+      {/* Commit log — chỉ hiện khi có project */}
       <div className="mt-8">
         <CommitLog />
       </div>

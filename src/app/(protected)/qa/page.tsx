@@ -16,6 +16,7 @@ import MDEditor from "@uiw/react-md-editor";
 import rehypeSanitize from "rehype-sanitize";
 import CodeReferences from "../dashboard/code-references";
 import { QASkeleton } from "@/components/ui/page-skeletons";
+import NoProjectSelected from "@/components/ui/no-project-selected";
 
 const QAPage = () => {
   const { selectedProject } = useProjectStore();
@@ -28,6 +29,20 @@ const QAPage = () => {
   useEffect(() => {
     setQuestionIndex(0);
   }, [selectedProject?.id]);
+
+  if (!selectedProject) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="opacity-40 pointer-events-none select-none">
+          <AskQuestionCard />
+        </div>
+        <NoProjectSelected
+          title="No project selected"
+          description="Select a project from the sidebar to view and ask questions."
+        />
+      </div>
+    );
+  }
 
   return (
     <Sheet>
