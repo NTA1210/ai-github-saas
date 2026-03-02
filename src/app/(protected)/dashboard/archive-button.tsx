@@ -68,10 +68,10 @@ const ArchiveButton = () => {
 
       <Button
         size="sm"
-        variant="destructive"
+        variant="outline"
         disabled={isPending}
         onClick={() => setOpen(true)}
-        className="cursor-pointer"
+        className="cursor-pointer border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors duration-200"
       >
         Archive
       </Button>

@@ -203,5 +203,8 @@ model InviteLink {
 
   expiresAt DateTime
 
+  revokedAt DateTime?
+
   @@index([expiresAt])
+  @@index([revokedAt])
 }

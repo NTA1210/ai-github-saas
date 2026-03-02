@@ -29,9 +29,9 @@ export default function ErrorBoundary({
         <h1 className="text-2xl font-bold text-gray-900">
           Something went wrong
         </h1>
-        <p className="text-sm text-muted-foreground max-w-sm">
+        {/* <p className="text-sm text-muted-foreground max-w-sm">
           {error?.message || "An unexpected error occurred. Please try again."}
-        </p>
+        </p> */}
       </div>
 
       {/* Actions */}

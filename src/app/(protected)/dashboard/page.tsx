@@ -8,9 +8,30 @@ import AskQuestionCard from "./ask-question-card";
 import MeetingCard from "./meeting-card";
 import ArchiveButton from "./archive-button";
 import InviteButton from "./invite-button";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+import { toast } from "sonner";
+import { getProjectById } from "@/features/projects/api/use-get-project";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
-  const { selectedProject } = useProjectStore();
+  const { selectedProject, setSelectedProject } = useProjectStore();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const errorCode = searchParams.get("error-code");
+  const projectId = searchParams.get("project-id");
+
+  useEffect(() => {
+    if (errorCode === "already-joined" && projectId) {
+      getProjectById(projectId).then(({ project }) => {
+        if (project) {
+          setSelectedProject(project);
+          toast.info("You are already a member of this project");
+        }
+        router.replace("/dashboard");
+      });
+    }
+  }, [errorCode, projectId, setSelectedProject, router]);
 
   if (!selectedProject) return null;
 

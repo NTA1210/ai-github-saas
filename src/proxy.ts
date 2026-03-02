@@ -6,7 +6,7 @@ const isPublicPage = createRouteMatcher([
   "/sign-up(.*)",
   "/sync-user", // ← QUAN TRỌNG: Clerk redirect đến đây sau sign-up
   "/", // landing page
-  // Thêm page public khác ở đây...
+  "/join(.*)",
 ]);
 
 // ✅ Public API Routes — ai cũng gọi được (không cần đăng nhập)
@@ -18,7 +18,8 @@ export default clerkMiddleware(async (auth, req) => {
   // Nếu là public page hoặc public API → bỏ qua, không cần đăng nhập
   if (isPublicPage(req) || isPublicApi(req)) return;
 
-  // Tất cả các route còn lại → bắt buộc đăng nhập
+  // Tất cả route còn lại → bắt buộc đăng nhập
+  // auth.protect() tự redirect về sign-in và giữ returnBackUrl
   await auth.protect();
 });
 
