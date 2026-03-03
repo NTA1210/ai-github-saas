@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { getProjectById } from "@/features/projects/api/use-get-project";
 import { useRouter } from "next/navigation";
 import NoProjectSelected from "@/components/ui/no-project-selected";
+import TeamMembers from "./team-members";
 
 export default function DashboardPage() {
   const { selectedProject, setSelectedProject } = useProjectStore();
@@ -75,7 +76,7 @@ export default function DashboardPage() {
         <div className="h-4"></div>
 
         <div className="flex items-center gap-4">
-          Team member <InviteButton /> <ArchiveButton />
+          <TeamMembers /> <InviteButton /> <ArchiveButton />
         </div>
       </div>
 
