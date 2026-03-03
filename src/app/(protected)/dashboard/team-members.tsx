@@ -11,21 +11,25 @@ const TeamMembers = () => {
   const { data } = useGetTeamMembers(selectedProject?.id || "");
 
   return (
-    <div className="flex items-center  -space-x-2">
+    <div className="flex items-center -space-x-2">
       {data?.map((member) => (
-        <Tooltip>
+        <Tooltip key={member.id}>
           <TooltipTrigger asChild>
             <img
-              key={member.id}
               src={member.imageUrl || ""}
               alt={member.firstName || ""}
               height={30}
               width={30}
-              className="rounded-full outline-1 outline-white"
+              className="rounded-full border-2 border-sidebar cursor-pointer hover:z-10 transition-transform duration-200"
             />
           </TooltipTrigger>
           <TooltipContent>
-            <p>{member.firstName}</p>
+            <p className="text-sm font-medium">
+              {member.firstName} {member.lastName}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {member.emailAddress}
+            </p>
           </TooltipContent>
         </Tooltip>
       ))}
